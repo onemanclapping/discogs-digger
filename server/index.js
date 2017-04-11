@@ -7,7 +7,39 @@ function getInventory(user) {
   return new Promise(resolve => {
     function finish() {
       return Promise.all(promises).then(all => {
-        resolve(all.length)
+        const data = new Map()
+        all.forEach(page => {
+          page.listings.forEach(listing => {
+            const limit = listing.release.description.indexOf(` - `)
+            const artist = listing.release.description.substring(0, limit)
+            const title = listing.release.description.substring(limit + 3)
+
+            let media = []
+            if (title.includes('LP') || title.includes('12"') || title.includes('10"') || title.includes('7"')) {
+                media.push('vinyl')
+            }
+            if (title.includes('CD')) {
+                media.push('CD')
+            }
+            if (title.includes('DVD')) {
+                media.push('DVD')
+            }
+
+            data.set(listing.release.id, {
+              condition: listing.condition,
+              price: listing.price.value,
+              currency: listing.price.currency,
+              description: listing.release.description,
+              releaseId: listing.release.id,
+              uri: listing.uri,
+              artist,
+              title,
+              media
+            })  
+          })
+        })
+
+        resolve([...data.values()])
       })
     }
     const firstRequest = new Discogs().marketplace().getInventory(user, {per_page: 1000})
@@ -75,9 +107,13 @@ app.get('/', function (req, res) {
   //   console.log(lastPage)
   // }, e => console.log(e))
 
-  getInventory('kaleidosmoker').then(count => console.log(count))
+  // getInventory('schaerban').then(count => console.log(count))
+  getInventory('kaleidosmoker').then(inv => {
+    res.send(JSON.stringify(inv))
+    console.log(inv.length)
+  })
 
-  res.send('Hello World!')
+  
 })
 
 app.listen(3000, function () {
