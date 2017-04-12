@@ -3,6 +3,7 @@ var app = express()
 var Discogs = require('disconnect').Client
 var admin = require("firebase-admin");
 var serviceAccount = require('./discogs-digger-1bd36-firebase-adminsdk-lxhwi-e5f19dddcb.json');
+var removeDiacritics = require('diacritics').remove
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
@@ -12,9 +13,9 @@ admin.initializeApp({
 function getInventory(user) {
   return new Promise(resolve => {
     function finish() {
-      return Promise.all(promises).then(all => {
+      return Promise.all(promises).then(pages => {
         const data = new Map()
-        all.forEach(page => {
+        pages.forEach(page => {
           page.listings.forEach(listing => {
             const limit = listing.release.description.indexOf(` - `)
             const artist = listing.release.description.substring(0, limit)
@@ -35,7 +36,7 @@ function getInventory(user) {
         resolve([...data.values()])
       })
     }
-    const firstRequest = new Discogs().marketplace().getInventory(user, {per_page: 1000})
+    const firstRequest = new Discogs().marketplace().getInventory(user, {per_page: 100, page: 1, sort: 'artist', sort_order: 'asc'})
     const promises = [firstRequest]
     return firstRequest.then(res => {
       const lastPage = Math.ceil(res.pagination.items / res.pagination.per_page);
@@ -53,7 +54,52 @@ function getInventory(user) {
             return getNextPage(1, limit - 100, 'desc')
           }
         }
-        const request = new Discogs().marketplace().getInventory(user, {per_page: 1000, page, sort: 'artist', sort_order})
+        const request = new Discogs().marketplace().getInventory(user, {per_page: 100, page, sort: 'artist', sort_order})
+        promises.push(request)
+        return request.then(() => getNextPage(page + 1, limit, sort_order))
+      }
+
+      return getNextPage(1, lastPage);
+    })
+  })
+}
+
+function getFavouriteArtists(user) {
+  return new Promise(resolve => {
+    function finish() {
+      return Promise.all(promises).then(pages => {
+        const artistSet = new Set()
+        
+        pages.forEach(page => {
+          page.releases.forEach(release => {
+            release.basic_information.artists.forEach(artist => {
+              artistSet.add(removeDiacritics(artist.name).toLowerCase())
+            })
+          })
+        })
+        
+        resolve([...artistSet.values()])
+      })
+    }
+    const firstRequest = new Discogs().user().collection().getReleases(user, 0, {per_page: 100, page: 1, sort: 'artist', sort_order: 'asc'})
+    const promises = [firstRequest]
+    return firstRequest.then(res => {
+      const lastPage = Math.ceil(res.pagination.items / res.pagination.per_page);
+
+      function getNextPage(page, limit, sort_order = 'asc') {
+        console.log('going for page', page, sort_order, limit)
+        if (page > limit) {
+          return finish()
+        }
+        if (page > 100) {
+          if (sort_order === 'desc') {
+            return finish()
+          }
+          else {
+            return getNextPage(1, limit - 100, 'desc')
+          }
+        }
+        const request = new Discogs().user().collection().getReleases(user, 0, {per_page: 100, page, sort: 'artist', sort_order})
         promises.push(request)
         return request.then(() => getNextPage(page + 1, limit, sort_order))
       }
@@ -65,18 +111,26 @@ function getInventory(user) {
 
 app.get('/dig/:buyer/:seller', async (req, res) => {
   const {buyer, seller} = req.params
-  const dbRef = admin.database().ref(`inventory/${seller}`)
+  const inventoryDBRef = admin.database().ref(`inventory/${seller}`)
+  const artistsDBRef = admin.database().ref(`artists/${buyer}`)
 
   // get possible inventory from db
-  let inventory = (await dbRef.once('value')).val()
+  let inventory = (await inventoryDBRef.once('value')).val()
 
   // if inventory does not exist, cache it
   if (!inventory) {
     inventory = await getInventory(seller)
-    dbRef.set(inventory)
+    inventoryDBRef.set(inventory)
   }
 
-  res.json(inventory)
+  let favouriteArtists = (await artistsDBRef.once('value')).val()
+
+  if (!favouriteArtists) {
+    favouriteArtists = await getFavouriteArtists(buyer)
+    artistsDBRef.set(favouriteArtists)
+  }
+
+  res.json(inventory.filter(item => favouriteArtists.includes(removeDiacritics(item.artist).toLowerCase())))
 })
 
 app.listen(3000, function () {
