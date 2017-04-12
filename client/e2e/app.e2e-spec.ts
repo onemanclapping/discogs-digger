@@ -1,10 +1,10 @@
-import { DdClientPage } from './app.po';
+import { ClientPage } from './app.po';
 
-describe('dd-client App', () => {
-  let page: DdClientPage;
+describe('client App', () => {
+  let page: ClientPage;
 
   beforeEach(() => {
-    page = new DdClientPage();
+    page = new ClientPage();
   });
 
   it('should display message saying app works', () => {
