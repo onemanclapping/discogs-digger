@@ -59,7 +59,7 @@ function getInventory(user) {
         return request.then(() => getNextPage(page + 1, limit, sort_order))
       }
 
-      return getNextPage(1, lastPage)
+      return getNextPage(2, lastPage)
     })
   })
 }
@@ -104,7 +104,7 @@ function getFavouriteArtists(user) {
         return request.then(() => getNextPage(page + 1, limit, sort_order))
       }
 
-      return getNextPage(1, lastPage)
+      return getNextPage(2, lastPage)
     })
   })
 }
