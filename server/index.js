@@ -1,14 +1,14 @@
-var express = require('express')
-var app = express()
-var Discogs = require('disconnect').Client
-var admin = require("firebase-admin");
-var serviceAccount = require('./discogs-digger-1bd36-firebase-adminsdk-lxhwi-e5f19dddcb.json');
-var removeDiacritics = require('diacritics').remove
+const express = require('express')
+const app = express()
+const Discogs = require('disconnect').Client
+const admin = require("firebase-admin")
+const serviceAccount = require('./discogs-digger-1bd36-firebase-adminsdk-lxhwi-e5f19dddcb.json')
+const removeDiacritics = require('diacritics').remove
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
   databaseURL: "https://discogs-digger-1bd36.firebaseio.com"
-});
+})
 
 function getInventory(user) {
   return new Promise(resolve => {
@@ -39,7 +39,7 @@ function getInventory(user) {
     const firstRequest = new Discogs().marketplace().getInventory(user, {per_page: 100, page: 1, sort: 'artist', sort_order: 'asc'})
     const promises = [firstRequest]
     return firstRequest.then(res => {
-      const lastPage = Math.ceil(res.pagination.items / res.pagination.per_page);
+      const lastPage = Math.ceil(res.pagination.items / res.pagination.per_page)
 
       function getNextPage(page, limit, sort_order = 'asc') {
         console.log('going for page', page, sort_order, limit)
@@ -59,7 +59,7 @@ function getInventory(user) {
         return request.then(() => getNextPage(page + 1, limit, sort_order))
       }
 
-      return getNextPage(1, lastPage);
+      return getNextPage(1, lastPage)
     })
   })
 }
@@ -84,7 +84,7 @@ function getFavouriteArtists(user) {
     const firstRequest = new Discogs().user().collection().getReleases(user, 0, {per_page: 100, page: 1, sort: 'artist', sort_order: 'asc'})
     const promises = [firstRequest]
     return firstRequest.then(res => {
-      const lastPage = Math.ceil(res.pagination.items / res.pagination.per_page);
+      const lastPage = Math.ceil(res.pagination.items / res.pagination.per_page)
 
       function getNextPage(page, limit, sort_order = 'asc') {
         console.log('going for page', page, sort_order, limit)
@@ -104,7 +104,7 @@ function getFavouriteArtists(user) {
         return request.then(() => getNextPage(page + 1, limit, sort_order))
       }
 
-      return getNextPage(1, lastPage);
+      return getNextPage(1, lastPage)
     })
   })
 }
