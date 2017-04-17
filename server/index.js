@@ -109,24 +109,35 @@ function getFavouriteArtists(user) {
   })
 }
 
-app.get('/dig/:buyer/:seller', async (req, res) => {
+app.get('/api/:buyer/:seller', async (req, res) => {
   const {buyer, seller} = req.params
+
+  console.log(`digging buyer ${buyer} for seller ${seller}`)
+
   const inventoryDBRef = admin.database().ref(`inventory/${seller}`)
   const artistsDBRef = admin.database().ref(`artists/${buyer}`)
 
   // get possible inventory from db
+  const t0 = Date.now();
   let inventory = (await inventoryDBRef.once('value')).val()
+  console.log(`inventory cache took ${Date.now() - t0}`)
 
   // if inventory does not exist, cache it
   if (!inventory) {
+    const t1 = Date.now();
     inventory = await getInventory(seller)
+    console.log(`inventory fetch took ${Date.now() - t1}`)
     inventoryDBRef.set(inventory)
   }
 
+  const t2 = Date.now();
   let favouriteArtists = (await artistsDBRef.once('value')).val()
+  console.log(`artists cache took ${Date.now() - t2}`)
 
   if (!favouriteArtists) {
+    const t3= Date.now();
     favouriteArtists = await getFavouriteArtists(buyer)
+    console.log(`artists fetch took ${Date.now() - t3}`)
     artistsDBRef.set(favouriteArtists)
   }
 
@@ -134,5 +145,5 @@ app.get('/dig/:buyer/:seller', async (req, res) => {
 })
 
 app.listen(3000, function () {
-  console.log('Example app listening on port 3000!')
+  console.log('Discogs Digger listening on port 3000')
 })

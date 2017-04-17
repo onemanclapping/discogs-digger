@@ -9,6 +9,7 @@ import { HomeComponent } from './home/home.component';
 import { DigComponent } from './dig/dig.component';
 import { AboutComponent } from './about/about.component';
 import { DigService } from './dig/dig.service';
+import { NavbarComponent } from './navbar/navbar.component';
 
 const appRoutes: Routes = [
   { path: 'home', component: HomeComponent },
@@ -26,7 +27,8 @@ const appRoutes: Routes = [
     AppComponent,
     HomeComponent,
     DigComponent,
-    AboutComponent
+    AboutComponent,
+    NavbarComponent
   ],
   imports: [
     BrowserModule,
