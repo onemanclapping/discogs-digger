@@ -112,7 +112,7 @@ function getFavouriteArtists(user, pendingKey) {
         const request = new Discogs().user().collection().getReleases(user, 0, {per_page: 100, page, sort: 'artist', sort_order})
         promises.push(request)
         return request.then(() => {
-          pendingRequests[pendingKey].buyerData.currentPage++;
+          pendingRequests[pendingKey].status.buyerData.currentPage++;
           getNextPage(page + 1, limit, sort_order)
         })
       }
