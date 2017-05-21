@@ -15,8 +15,11 @@ async function tick() {
         tick()
     } catch (err) {
         console.error(err)
-        busy = false
-        tick()
+        
+        setTimeout(() => {
+            busy = false
+            tick()
+        }, 60000)
     }
 }
 
