@@ -5,6 +5,10 @@ const admin = require("firebase-admin")
 const serviceAccount = require('./discogs-digger-1bd36-firebase-adminsdk-lxhwi-e5f19dddcb.json')
 const removeDiacritics = require('diacritics').remove
 const throttler = require('./throttler')
+const keys = {
+	consumerKey: 'uyNlWLZmSEGTNVJHFCyZ', 
+	consumerSecret: 'LJAxFHXDkWPJJesvYzOwOuwOxeGBkCWM'
+}
 
 // Map of buyer;seller pending requests
 const pendingRequests = {}
@@ -40,7 +44,7 @@ function getInventory(user, pendingKey) {
         resolve([...data.values()])
       })
     }
-    const firstRequest = throttler.exec(() => new Discogs().marketplace().getInventory(user, {per_page: 100, page: 1, sort: 'artist', sort_order: 'asc'}))
+    const firstRequest = throttler.exec(() => new Discogs(keys).marketplace().getInventory(user, {per_page: 100, page: 1, sort: 'artist', sort_order: 'asc'}))
     const promises = [firstRequest]
     return firstRequest.then(res => {
       const lastPage = Math.ceil(res.pagination.items / res.pagination.per_page)
@@ -60,7 +64,7 @@ function getInventory(user, pendingKey) {
             return getNextPage(1, limit - 100, 'desc')
           }
         }
-        const request = throttler.exec(() => new Discogs().marketplace().getInventory(user, {per_page: 100, page, sort: 'artist', sort_order}))
+        const request = throttler.exec(() => new Discogs(keys).marketplace().getInventory(user, {per_page: 100, page, sort: 'artist', sort_order}))
         promises.push(request)
         return request.then(() => {
           pendingRequests[pendingKey].status.sellerData.currentPage++;
@@ -90,7 +94,7 @@ function getFavouriteArtists(user, pendingKey) {
         resolve([...artistSet.values()])
       })
     }
-    const firstRequest = throttler.exec(() => new Discogs().user().collection().getReleases(user, 0, {per_page: 100, page: 1, sort: 'artist', sort_order: 'asc'}))
+    const firstRequest = throttler.exec(() => new Discogs(keys).user().collection().getReleases(user, 0, {per_page: 100, page: 1, sort: 'artist', sort_order: 'asc'}))
     const promises = [firstRequest]
     return firstRequest.then(res => {
       const lastPage = Math.ceil(res.pagination.items / res.pagination.per_page)
@@ -110,7 +114,7 @@ function getFavouriteArtists(user, pendingKey) {
             return getNextPage(1, limit - 100, 'desc')
           }
         }
-        const request = throttler.exec(() => new Discogs().user().collection().getReleases(user, 0, {per_page: 100, page, sort: 'artist', sort_order}))
+        const request = throttler.exec(() => new Discogs(keys).user().collection().getReleases(user, 0, {per_page: 100, page, sort: 'artist', sort_order}))
         promises.push(request)
         return request.then(() => {
           pendingRequests[pendingKey].status.buyerData.currentPage++;
