@@ -1,42 +1,28 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { HttpModule } from '@angular/http';
 import { RouterModule, Routes } from '@angular/router';
 
 import { AppComponent } from './app.component';
 import { HomeComponent } from './home/home.component';
-import { DigComponent } from './dig/dig.component';
-import { AboutComponent } from './about/about.component';
-import { DigService } from './dig/dig.service';
-import { NavbarComponent } from './navbar/navbar.component';
-
-const appRoutes: Routes = [
-  { path: 'home', component: HomeComponent },
-  { path: 'dig/:buyer/:seller', component: DigComponent },
-  { path: 'dig', component: DigComponent },
-  { path: 'about', component: AboutComponent },
-  { path: '**',
-    redirectTo: '/home',
-    pathMatch: 'full'
-  }
-];
+import { FooterComponent } from './footer/footer.component';
+import { LoginService } from './login.service';
 
 @NgModule({
   declarations: [
     AppComponent,
     HomeComponent,
-    DigComponent,
-    AboutComponent,
-    NavbarComponent
+    FooterComponent
   ],
   imports: [
     BrowserModule,
-    FormsModule,
-    HttpModule,
-    RouterModule.forRoot(appRoutes)
+    RouterModule.forRoot([
+      { path: '', component: HomeComponent},
+      { path: 'about', loadChildren: '../about/about.module#AboutModule' },
+      { path: 'results', loadChildren: '../results/results.module#ResultsModule' },
+      { path: '**', redirectTo: '/' }
+    ])
   ],
-  providers: [DigService],
+  providers: [LoginService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

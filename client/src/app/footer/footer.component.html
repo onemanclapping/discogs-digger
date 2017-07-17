@@ -1,0 +1,6 @@
+<ul>
+  <li *ngIf="loggedIn"><a (click)="changeLogin()">Logout</a></li>
+  <li><a routerLink="" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Home</a></li>
+  <li><a routerLink="/about" routerLinkActive="active">About</a></li>
+  <li><a href="https://github.com/onemanclapping/discogs-digger">Github</a></li>
+</ul>

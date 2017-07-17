@@ -1,3 +1,14 @@
-<p>
-  home works!
-</p>
+<h1>Discogs Digger</h1>
+<h2>find your favourite records from a seller</h2>
+<div *ngIf="!loggedIn"><button (click)="changeLogin()">login</button></div>
+<div *ngIf="loggedIn">
+    <input (keyup)="setSeller($event)" type="text" placeholder="Type the name of your potential seller"/>
+    <button [disabled]="!isInputValid" (click)="fetchData()">GO!</button>
+</div>
+<div *ngIf="isWorking" class="overlay">
+    <div class="center">
+        <div class="progress">Fetching your library</div>
+        <div class="progress">Fetching {{seller}} library</div>
+        <button (click)="cancelFetch()">cancel</button>
+    </div>
+</div>
