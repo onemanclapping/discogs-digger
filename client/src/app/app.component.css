@@ -6,3 +6,9 @@ app-footer {
     text-align: center;
     display: block;
 }
+
+a {
+    color: #0366d6;
+    text-decoration: underline;
+    cursor: pointer;
+}

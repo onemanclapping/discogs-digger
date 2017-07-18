@@ -1,1 +1,43 @@
-RESULTS
+<h2>Records from {{sellerId}} you may like</h2>
+<div *ngIf="!isFiltersOpen">
+    <button (click)="toggleFilters()">Show filters</button>
+</div>
+<div *ngIf="isFiltersOpen">
+    <button (click)="toggleFilters()">Hide filters</button>
+    <div class="filter-wrapper">
+        <div class="filter-set">
+            Type:
+            <label><input type="checkbox">LP</label>
+            <label><input type="checkbox">12"</label>
+            <label><input type="checkbox">7"</label>
+            <label><input type="checkbox">CD</label>
+        </div>
+        <div class="filter-set">
+            Condition:
+            <label><input type="checkbox">Mint</label>
+            <label><input type="checkbox">VG</label>
+            <label><input type="checkbox">Good</label>
+            <label><input type="checkbox">Fair</label>
+        </div>
+    </div>
+</div>
+
+<table>
+    <tr>
+        <th *ngFor="let header of headers; let i = index"
+            (click)="orderBy(i)"
+            [ngClass]="{'active': header.canOrder}">
+            {{header.name}}
+            <span class="arrow"
+                *ngIf="header.canOrder"
+                [ngClass]="{'desc': header.desc, 'inactive': header.inactive}">▲</span>
+    </th>
+    </tr>
+    <tr *ngFor="let entry of results">
+        <td>{{entry.artist}}</td>
+        <td><a href="{{entry.uri}}">{{entry.title}}</a></td>
+        <td>{{entry.media}}</td>
+        <td>{{entry.condition}}</td>
+        <td>{{entry.currency}} {{entry.price}}</td>
+    </tr>
+</table>

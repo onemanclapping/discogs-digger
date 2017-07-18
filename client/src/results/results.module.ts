@@ -7,6 +7,7 @@ import { ResultsComponent }   from './results.component';
 
 @NgModule({
   imports: [
+    CommonModule,
     RouterModule.forChild([
       { path: ':sellerId', component: ResultsComponent }
     ])

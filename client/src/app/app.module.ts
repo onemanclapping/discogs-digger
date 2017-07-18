@@ -6,6 +6,7 @@ import { AppComponent } from './app.component';
 import { HomeComponent } from './home/home.component';
 import { FooterComponent } from './footer/footer.component';
 import { LoginService } from './login.service';
+import { ResultsService } from './results.service';
 
 @NgModule({
   declarations: [
@@ -22,7 +23,7 @@ import { LoginService } from './login.service';
       { path: '**', redirectTo: '/' }
     ])
   ],
-  providers: [LoginService],
+  providers: [LoginService, ResultsService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
