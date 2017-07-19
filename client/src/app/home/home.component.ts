@@ -1,6 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { LoginService } from '../login.service';
+import { ApiService } from '../api.service';
+import { Observable } from 'rxjs/Observable';
+import 'rxjs/add/observable/concat';
 
 
 @Component({
@@ -14,8 +17,11 @@ export class HomeComponent implements OnInit {
   seller: string;
   isInputValid: boolean = false;
   isWorking: boolean = false;
+  buyerProgressValue: Number = 0;
+  sellerProgressValue: Number = 0;
 
-  constructor(public loginService: LoginService, private router: Router) { }
+
+  constructor(private loginService: LoginService, private router: Router, private apiService: ApiService) { }
 
   setSeller(event: KeyboardEvent) { // with type info
     this.seller = (<HTMLInputElement>event.target).value;
@@ -24,7 +30,21 @@ export class HomeComponent implements OnInit {
 
   fetchData() {
     this.isWorking = true;
-    setTimeout(() => this.router.navigate(['/results', this.seller]), 1000)
+
+    this.apiService.fetchBuyer('onemanclap').subscribe(() => {
+      
+      this.apiService.fetchSeller(this.seller).subscribe(() => {
+        this.router.navigate(['/results', this.seller]);
+      });
+
+      this.apiService.sellerState('onemanclap').subscribe((state: any) => {
+        this.sellerProgressValue = Math.floor(state.value/state.max*100);
+      });
+    });
+    this.apiService.buyerState('onemanclap').subscribe((state: any) => {
+      this.buyerProgressValue = Math.floor(state.value/state.max*100);
+    });
+    
   }
 
   cancelFetch() {

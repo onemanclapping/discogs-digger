@@ -7,8 +7,17 @@
 </div>
 <div *ngIf="isWorking" class="overlay">
     <div class="center">
-        <div class="progress">Fetching your library</div>
-        <div class="progress">Fetching {{seller}} library</div>
+        <div class="progress-container">
+            <progress [attr.text]="'Fetching your library'"
+                [value]="buyerProgressValue"
+                max="100"></progress>
+        </div>
+        <div class="progress-container">
+            <progress [attr.text]="'Fetching ' + seller + '\'s library'"
+                [value]="sellerProgressValue"
+                max="100"></progress>
+        </div>
+
         <button (click)="cancelFetch()">cancel</button>
     </div>
 </div>

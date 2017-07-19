@@ -8,7 +8,7 @@ export class ResultsService {
         artist: "Pink Floyd",
         condition: "Near Mint (NM or M-)",
         currency: "EUR",
-        media: ["LP"],
+        media: ["LP", '12"'],
         price: 45,
         releaseId: 3958614,
         title: "Meddle (LP, Album, Club, RE)",
@@ -16,7 +16,7 @@ export class ResultsService {
       },
       {
         artist: "Pink Floyd2",
-        condition: "Near Mint (NM or M-)2",
+        condition: "VG",
         currency: "EUR2",
         media: ["LP2"],
         price: 452,

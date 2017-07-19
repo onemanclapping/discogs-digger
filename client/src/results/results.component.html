@@ -5,19 +5,11 @@
 <div *ngIf="isFiltersOpen">
     <button (click)="toggleFilters()">Hide filters</button>
     <div class="filter-wrapper">
-        <div class="filter-set">
-            Type:
-            <label><input type="checkbox">LP</label>
-            <label><input type="checkbox">12"</label>
-            <label><input type="checkbox">7"</label>
-            <label><input type="checkbox">CD</label>
-        </div>
-        <div class="filter-set">
-            Condition:
-            <label><input type="checkbox">Mint</label>
-            <label><input type="checkbox">VG</label>
-            <label><input type="checkbox">Good</label>
-            <label><input type="checkbox">Fair</label>
+        <div class="filter-set" *ngFor="let filter of filters; let filterIndex = index">
+            {{filter.name}}
+            <label *ngFor="let option of filter.options; let optionIndex = index">
+                <input type="checkbox" (click)="toggleFilter(filterIndex, optionIndex)">
+                    {{option.name}}</label>
         </div>
     </div>
 </div>
@@ -25,7 +17,7 @@
 <table>
     <tr>
         <th *ngFor="let header of headers; let i = index"
-            (click)="orderBy(i)"
+            (click)="toggleOrderBy(i)"
             [ngClass]="{'active': header.canOrder}">
             {{header.name}}
             <span class="arrow"
@@ -33,7 +25,7 @@
                 [ngClass]="{'desc': header.desc, 'inactive': header.inactive}">▲</span>
     </th>
     </tr>
-    <tr *ngFor="let entry of results">
+    <tr *ngFor="let entry of filteredResults">
         <td>{{entry.artist}}</td>
         <td><a href="{{entry.uri}}">{{entry.title}}</a></td>
         <td>{{entry.media}}</td>
