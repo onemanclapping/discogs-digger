@@ -8,6 +8,7 @@ import { FooterComponent } from './footer/footer.component';
 import { LoginService } from './login.service';
 import { ResultsService } from './results.service';
 import { ApiService } from './api.service';
+import { CoreModule } from '../core/core.module';
 
 @NgModule({
   declarations: [
@@ -22,9 +23,10 @@ import { ApiService } from './api.service';
       { path: 'about', loadChildren: '../about/about.module#AboutModule' },
       { path: 'results', loadChildren: '../results/results.module#ResultsModule' },
       { path: '**', redirectTo: '/' }
-    ])
+    ]),
+    CoreModule
   ],
   providers: [LoginService, ResultsService, ApiService],
-  bootstrap: [AppComponent]
+  bootstrap: [AppComponent],
 })
 export class AppModule { }

@@ -15,16 +15,18 @@
 </div>
 
 <table>
-    <tr>
-        <th *ngFor="let header of headers; let i = index"
-            (click)="toggleOrderBy(i)"
-            [ngClass]="{'active': header.canOrder}">
-            {{header.name}}
-            <span class="arrow"
-                *ngIf="header.canOrder"
-                [ngClass]="{'desc': header.desc, 'inactive': header.inactive}">▲</span>
-    </th>
-    </tr>
+    <thead>
+        <tr>
+            <th *ngFor="let header of headers; let i = index"
+                (click)="toggleOrderBy(i)"
+                [ngClass]="{'active': header.canOrder}">
+                {{header.name}}
+                <span class="arrow"
+                    *ngIf="header.canOrder"
+                    [ngClass]="{'desc': header.desc, 'inactive': header.inactive}">▲</span>
+            </th>
+        </tr>
+    </thead>
     <tr *ngFor="let entry of filteredResults">
         <td>{{entry.artist}}</td>
         <td><a href="{{entry.uri}}">{{entry.title}}</a></td>
@@ -33,3 +35,9 @@
         <td>{{entry.currency}} {{entry.price}}</td>
     </tr>
 </table>
+<app-progress-overlay
+    *ngIf="isWorking"
+    [buyerProgressValue]="buyerProgressValue"
+    [sellerProgressValue]="sellerProgressValue"
+    [sellerName]="sellerId"
+    (onCancel)="cancelFetch()"></app-progress-overlay>

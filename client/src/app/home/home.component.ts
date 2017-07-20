@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { LoginService } from '../login.service';
 import { ApiService } from '../api.service';
 import { Observable } from 'rxjs/Observable';
+import { Subscription } from 'rxjs/Subscription';
 import 'rxjs/add/observable/concat';
 
 
@@ -20,35 +21,36 @@ export class HomeComponent implements OnInit {
   buyerProgressValue: Number = 0;
   sellerProgressValue: Number = 0;
 
+  private currentFetch: Subscription;
+
 
   constructor(private loginService: LoginService, private router: Router, private apiService: ApiService) { }
 
-  setSeller(event: KeyboardEvent) { // with type info
+  setSeller(event: KeyboardEvent) {
     this.seller = (<HTMLInputElement>event.target).value;
     this.isInputValid = !!this.seller;
+
+    if (this.isInputValid && event.keyCode == 13) {
+      this.fetchData();
+    }
   }
 
   fetchData() {
     this.isWorking = true;
 
-    this.apiService.fetchBuyer('onemanclap').subscribe(() => {
+    this.currentFetch = this.apiService.fetchBuyerAndSeller('onemanclap', this.seller).subscribe(res => {
+      this.buyerProgressValue = res.buyer.progress;
+      this.sellerProgressValue = res.seller.progress;
       
-      this.apiService.fetchSeller(this.seller).subscribe(() => {
+      if (this.buyerProgressValue === 100 && this.sellerProgressValue === 100) {
         this.router.navigate(['/results', this.seller]);
-      });
-
-      this.apiService.sellerState('onemanclap').subscribe((state: any) => {
-        this.sellerProgressValue = Math.floor(state.value/state.max*100);
-      });
-    });
-    this.apiService.buyerState('onemanclap').subscribe((state: any) => {
-      this.buyerProgressValue = Math.floor(state.value/state.max*100);
-    });
-    
+      }
+    });    
   }
 
   cancelFetch() {
     this.isWorking = false;
+    this.currentFetch.unsubscribe();
   }
 
   ngOnInit() {

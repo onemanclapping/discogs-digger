@@ -17,6 +17,8 @@ table {
     margin-top: 20px;
 }
 
+tbody tr:nth-child(2n + 1) {background: #EEE}
+
 .active {
     cursor: pointer;
 }

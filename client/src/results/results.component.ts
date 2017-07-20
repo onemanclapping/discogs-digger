@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ResultsService } from '../app/results.service';
 import { ApiService } from '../app/api.service';
 
@@ -13,7 +13,10 @@ export class ResultsComponent implements OnInit {
   rawResults: any[];
   filteredResults: any[];
   isFiltersOpen: boolean = false;
-  headers = [
+  buyerProgressValue: Number = 0;
+  sellerProgressValue: Number = 0;
+  isWorking: boolean = true;
+  headers:any = [
     {
       name: 'artist',
       canOrder: true,
@@ -28,15 +31,11 @@ export class ResultsComponent implements OnInit {
     },
     {
       name: 'media',
-      canOrder: false,
-      desc: false,
-      inactive: true
+      canOrder: false
     },
     {
       name: 'condition',
-      canOrder: true,
-      desc: false,
-      inactive: true
+      canOrder: false
     },
     {
       name: 'price',
@@ -45,6 +44,7 @@ export class ResultsComponent implements OnInit {
       inactive: true
     }
   ];
+  // TODO would be cool to get this from the actual results
   filters = [{
     name: 'Media',
     property: 'media',
@@ -73,22 +73,32 @@ export class ResultsComponent implements OnInit {
     }]
   }];
 
-  constructor(private route: ActivatedRoute, private resultsService: ResultsService, private apiService: ApiService) { }
+  constructor(private route: ActivatedRoute,
+    private resultsService: ResultsService,
+    private apiService: ApiService,
+    private router: Router) { }
 
   ngOnInit() {
     this.route.params.subscribe(params => {
+      this.isWorking = true;
       this.sellerId = params['sellerId'];
-      this.apiService.fetchBuyer('onemanclap').subscribe(buyerData => {
-        this.apiService.fetchSeller(this.sellerId).subscribe(sellerData => {
-          console.log(buyerData)
-          console.log(sellerData)
-        })
-      })
+        this.apiService.fetchBuyerAndSeller('onemanclap', this.sellerId).subscribe(res => {
+          this.buyerProgressValue = res.buyer.progress;
+          this.sellerProgressValue = res.seller.progress;
+          
+          if (res.buyer.result && res.seller.result) {
+            this.isWorking = false;
+
+            this.rawResults = this.matchBuyerWithSeller(res.buyer.result, res.seller.result);
+
+            console.log(this.rawResults)
+            // this.rawResults = this.resultsService.getResults(this.sellerId);
+            
+            this.filterResults();
+            this.reOrder();
+          }
+        });
     });
-    this.rawResults = this.resultsService.getResults(this.sellerId);
-    
-    this.filterResults();
-    this.reOrder();
   }
 
   filterResults() {
@@ -143,5 +153,13 @@ export class ResultsComponent implements OnInit {
         return prop1 > prop2 ? 1: 0;
       });
     }
+  }
+
+  cancelFetch() {
+    this.router.navigate(['/']);
+  }
+
+  matchBuyerWithSeller(buyerResults, sellerResults) {
+    return sellerResults.filter(sellerItem => buyerResults.includes(sellerItem.artist));
   }
 }

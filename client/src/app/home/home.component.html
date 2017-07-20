@@ -5,19 +5,9 @@
     <input (keyup)="setSeller($event)" type="text" placeholder="Type the name of your potential seller"/>
     <button [disabled]="!isInputValid" (click)="fetchData()">GO!</button>
 </div>
-<div *ngIf="isWorking" class="overlay">
-    <div class="center">
-        <div class="progress-container">
-            <progress [attr.text]="'Fetching your library'"
-                [value]="buyerProgressValue"
-                max="100"></progress>
-        </div>
-        <div class="progress-container">
-            <progress [attr.text]="'Fetching ' + seller + '\'s library'"
-                [value]="sellerProgressValue"
-                max="100"></progress>
-        </div>
-
-        <button (click)="cancelFetch()">cancel</button>
-    </div>
-</div>
+<app-progress-overlay
+    *ngIf="isWorking"
+    [buyerProgressValue]="buyerProgressValue"
+    [sellerProgressValue]="sellerProgressValue"
+    [sellerName]="seller"
+    (onCancel)="cancelFetch()"></app-progress-overlay>
