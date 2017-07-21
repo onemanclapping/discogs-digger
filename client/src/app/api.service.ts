@@ -1,31 +1,37 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Subject } from 'rxjs/Subject';
+import { HttpClient } from '@angular/common/http';
+import { IntervalObservable } from 'rxjs/observable/IntervalObservable';
+import 'rxjs/add/operator/mergeMap';
+import 'rxjs/add/operator/map';
 
 @Injectable()
 export class ApiService {
   private sellerCache = {};
   private buyerCache = {};
 
-  constructor() { }
+  constructor(private http: HttpClient) { }
 
   fetchBuyer(buyer) {
     if (this.buyerCache[buyer]) return this.buyerCache[buyer];
 
     const fetch = new BehaviorSubject(<any>{
-      progress: 0,
-      result: undefined
+      progress: 0
     });
     this.buyerCache[buyer] = fetch;
     
-    this.buyerState(buyer).subscribe(res => {
+    const buyerStateSubscription = this.buyerState(buyer).subscribe(res => {
       fetch.next(res);
     });
-    
-    setTimeout(() => fetch.next({
-      progress: 100,
-      result: ['James', 'Depeche Mode']
-    }), 5000);
+
+    this.http.get(`/api/buyer/${buyer}`).subscribe(res => {
+      buyerStateSubscription.unsubscribe();
+      fetch.next({
+        progress: 100,
+        result: res
+      });
+    });
 
     return fetch;
   }
@@ -38,41 +44,18 @@ export class ApiService {
     });
     this.sellerCache[seller] = fetch;
 
-    this.sellerState(seller).subscribe(res => {
+    const sellerStateSubscription = this.sellerState(seller).subscribe(res => {
       fetch.next(res);
     });
+
+    this.http.get(`/api/seller/${seller}`).subscribe(res => {
+      sellerStateSubscription.unsubscribe();
+      fetch.next({
+        progress: 100,
+        result: res
+      });
+    });
     
-    setTimeout(() => fetch.next({
-      progress: 100,
-      result: [{
-        artist: "Pink Floyd",
-        condition: "Near Mint (NM or M-)",
-        currency: "EUR",
-        media: ["LP", '12"'],
-        price: 45,
-        releaseId: 3958614,
-        title: "Meddle (LP, Album, Club, RE)",
-        uri: "https://www.discogs.com/sell/item/190248021"
-      }, {
-        artist: "James",
-        condition: "Near Mint (NM or M-)",
-        currency: "EUR",
-        media: ["LP", '12"'],
-        price: 45,
-        releaseId: 3958614,
-        title: "Wah Wah",
-        uri: "https://www.discogs.com/sell/item/190248021"
-      }, {
-        artist: "Depeche Mode",
-        condition: "Near Mint (NM or M-)",
-        currency: "EUR",
-        media: ["LP", '12"'],
-        price: 45,
-        releaseId: 3958614,
-        title: "Violator",
-        uri: "https://www.discogs.com/sell/item/190248021"
-      }]
-    }), 5000);
     return fetch;
   }
 
@@ -111,20 +94,24 @@ export class ApiService {
   }
 
   buyerState(buyer) {
-    const fetch = new Subject();
-    setTimeout(() => fetch.next({progress: 10}), 1000);
-    setTimeout(() => fetch.next({progress: 30}), 2000);
-    setTimeout(() => fetch.next({progress: 50}), 3000);
-    setTimeout(() => fetch.next({progress: 70}), 4000);
-    return fetch;
+    return IntervalObservable.create(1000)
+      .flatMap(() => {
+        return this.http.get(`/api/status/buyer/${buyer}`)
+      }).map((res) => {
+        return {progress: res}
+      });
   }
 
-  sellerState(buyer) {
-    const fetch = new Subject();
-    setTimeout(() => fetch.next({progress: 10}), 1000);
-    setTimeout(() => fetch.next({progress: 30}), 2000);
-    setTimeout(() => fetch.next({progress: 50}), 3000);
-    setTimeout(() => fetch.next({progress: 70}), 4000);
-    return fetch;
+  sellerState(seller) {
+    return IntervalObservable.create(1000)
+      .flatMap(() => {
+        return this.http.get(`/api/status/seller/${seller}`)
+      }).map((res) => {
+        return {progress: res}
+      });
+  }
+
+  getIdentity() {
+    return this.http.get('/api/identity');
   }
 }

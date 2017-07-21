@@ -1,7 +1,8 @@
 <h1>Discogs Digger</h1>
 <h2>find your favourite records from a seller</h2>
-<div *ngIf="!loggedIn"><button (click)="changeLogin()">login</button></div>
-<div *ngIf="loggedIn">
+<div *ngIf="!loggedIn.loggedIn"><button (click)="login()">login</button></div>
+<div *ngIf="loggedIn.loggedIn">
+    <h3>logged in as {{loggedIn.user}}</h3>
     <input (keyup)="setSeller($event)" type="text" placeholder="Type the name of your potential seller"/>
     <button [disabled]="!isInputValid" (click)="fetchData()">GO!</button>
 </div>

@@ -148,9 +148,9 @@ export class ResultsComponent implements OnInit {
         const prop2 = item2[orderProp.name];
 
         if (orderProp.desc) {
-          return prop1 < prop2 ? 1 : 0;
+          return prop1 < prop2 ? 1 : -1;
         }
-        return prop1 > prop2 ? 1: 0;
+        return prop1 > prop2 ? 1: -1;
       });
     }
   }

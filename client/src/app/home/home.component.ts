@@ -13,7 +13,6 @@ import 'rxjs/add/observable/concat';
   styleUrls: ['./home.component.css']
 })
 export class HomeComponent implements OnInit {
-  changeLogin = this.loginService.changeLogin;
   loggedIn: boolean;
   seller: string;
   isInputValid: boolean = false;
@@ -55,6 +54,10 @@ export class HomeComponent implements OnInit {
 
   ngOnInit() {
     this.loginService.loggedInState.subscribe(state => this.loggedIn = state);
+  }
+
+  login() {
+    window.location.href = '/api/authorize';
   }
 
 }
