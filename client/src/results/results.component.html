@@ -5,15 +5,14 @@
 <div *ngIf="isFiltersOpen">
     <button (click)="toggleFilters()">Hide filters</button>
     <div class="filter-wrapper">
-        <div class="filter-set" *ngFor="let filter of filters; let filterIndex = index">
-            {{filter.name}}
+        <fieldset *ngFor="let filter of filters; let filterIndex = index">
+            <legend>{{filter.name}}</legend>
             <label *ngFor="let option of filter.options; let optionIndex = index">
-                <input type="checkbox" (click)="toggleFilter(filterIndex, optionIndex)">
+                <input type="checkbox" (click)="toggleFilter(filterIndex, optionIndex)" [checked]="option.selected ? true : false">
                     {{option.name}}</label>
-        </div>
+        </fieldset>
     </div>
 </div>
-
 <table>
     <thead>
         <tr>
@@ -30,7 +29,6 @@
     <tr *ngFor="let entry of filteredResults">
         <td>{{entry.artist}}</td>
         <td><a href="{{entry.uri}}">{{entry.title}}</a></td>
-        <td>{{entry.media}}</td>
         <td>{{entry.condition}}</td>
         <td>{{entry.currency}} {{entry.price}}</td>
     </tr>

@@ -13,7 +13,7 @@ import 'rxjs/add/observable/concat';
   styleUrls: ['./home.component.css']
 })
 export class HomeComponent implements OnInit {
-  loggedIn: boolean;
+  loggedIn;
   seller: string;
   isInputValid: boolean = false;
   isWorking: boolean = false;
@@ -26,7 +26,7 @@ export class HomeComponent implements OnInit {
   constructor(private loginService: LoginService, private router: Router, private apiService: ApiService) { }
 
   setSeller(event: KeyboardEvent) {
-    this.seller = (<HTMLInputElement>event.target).value;
+    this.seller = (<HTMLInputElement>event.target).value.trim();
     this.isInputValid = !!this.seller;
 
     if (this.isInputValid && event.keyCode == 13) {

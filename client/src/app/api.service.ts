@@ -19,6 +19,17 @@ export class ApiService {
     const fetch = new BehaviorSubject(<any>{
       progress: 0
     });
+
+    const localKey = `buyer-${buyer}`;
+    let local = localStorage.getItem(localKey);
+    if (local) {
+      fetch.next({
+        progress: 100,
+        result: JSON.parse(local)
+      });
+      return fetch;
+    }
+
     this.buyerCache[buyer] = fetch;
     
     const buyerStateSubscription = this.buyerState(buyer).subscribe(res => {
@@ -31,6 +42,7 @@ export class ApiService {
         progress: 100,
         result: res
       });
+      localStorage.setItem(localKey, JSON.stringify(res));
     });
 
     return fetch;
@@ -42,6 +54,17 @@ export class ApiService {
     const fetch = new BehaviorSubject(<any>{
       progress: 0
     });
+
+    const localKey = `seller-${seller}`;
+    let local = localStorage.getItem(localKey);
+    if (local) {
+      fetch.next({
+        progress: 100,
+        result: JSON.parse(local)
+      });
+      return fetch;
+    }
+
     this.sellerCache[seller] = fetch;
 
     const sellerStateSubscription = this.sellerState(seller).subscribe(res => {
@@ -54,6 +77,7 @@ export class ApiService {
         progress: 100,
         result: res
       });
+      localStorage.setItem(localKey, JSON.stringify(res));
     });
     
     return fetch;
@@ -69,18 +93,12 @@ export class ApiService {
       }
     };
     const fetch = new BehaviorSubject(state);
-
     this.fetchBuyer(buyer).subscribe(res => {
-      
       state.buyer.progress = res.progress;
-
       if (res.result) {
         state.buyer.result = res.result;
-
         this.fetchSeller(seller).subscribe(res => {
-
           state.seller.progress = res.progress;
-          
           if (res.result) {
             state.seller.result = res.result;
           }

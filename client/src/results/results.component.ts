@@ -30,10 +30,6 @@ export class ResultsComponent implements OnInit {
       inactive: true
     },
     {
-      name: 'media',
-      canOrder: false
-    },
-    {
       name: 'condition',
       canOrder: false
     },
@@ -44,34 +40,7 @@ export class ResultsComponent implements OnInit {
       inactive: true
     }
   ];
-  // TODO would be cool to get this from the actual results
-  filters = [{
-    name: 'Media',
-    property: 'media',
-    options: [{
-      name: 'LP',
-      selected: false
-    }, {
-      name: '12"',
-      selected: false
-    }, {
-      name: '7"',
-      selected: false
-    }, {
-      name: 'CD',
-      selected: false
-    }]
-  }, {
-    name: 'Condition',
-    property: 'condition',
-    options: [{
-      name: 'VG',
-      selected: false
-    }, {
-      name: 'G',
-      selected: false
-    }]
-  }];
+  filters;
 
   constructor(private route: ActivatedRoute,
     private resultsService: ResultsService,
@@ -90,10 +59,7 @@ export class ResultsComponent implements OnInit {
             this.isWorking = false;
 
             this.rawResults = this.matchBuyerWithSeller(res.buyer.result, res.seller.result);
-
-            console.log(this.rawResults)
-            // this.rawResults = this.resultsService.getResults(this.sellerId);
-            
+            this.generateFilters();
             this.filterResults();
             this.reOrder();
           }
@@ -101,8 +67,60 @@ export class ResultsComponent implements OnInit {
     });
   }
 
+  generateFilters() {
+    const availableTypesSet = this.rawResults.reduce((set, res) => {
+      res.types.forEach(type => set.add(type));
+      return set;
+    }, new Set());
+    const availableTypes = Array.from(availableTypesSet).sort().map(filter => {
+      return {
+        name: filter,
+        selected: false
+      };
+    });
+
+    const availableConditionsSet = this.rawResults.reduce((set, res) => {
+      set.add(res.condition);
+      return set;
+    }, new Set());
+    const availableConditions = Array.from(availableConditionsSet)
+      .sort((a, b) => {
+        const conditions = ['Mint (M)', 'Near Mint (NM or M-)', 'Very Good Plus (VG+)', 'Very Good (VG)', 'Good Plus (G+)', 'Good (G)', 'Fair (F)', 'Poor (P)']
+        return conditions.indexOf(<any>a) - conditions.indexOf(<any>b);
+
+      })
+      .map(condition => {
+        return {
+          name: condition,
+          selected: false
+        };
+      });
+
+
+    this.filters = [{
+      name: 'Type',
+      property: 'types',
+      options: availableTypes
+    }, {
+      name: 'Condition',
+      property: 'condition',
+      options: availableConditions
+    }, {
+      name: 'Artists',
+      property: 'artist',
+      options: [{
+        name: 'Show Various (V/A)',
+        selected: true
+      }]
+    }];
+  }
+
   filterResults() {
     this.filteredResults = this.rawResults.filter(item => this.filters.every(filter => {
+      if (filter.property === 'artist') {
+        return filter.options[0].selected || item.artist !== 'Various';
+      }
+
       const activeOptions = filter.options.filter(option => option.selected).map(option => option.name);
 
       if (activeOptions.length === 0) return true;
@@ -118,6 +136,7 @@ export class ResultsComponent implements OnInit {
   toggleFilter(filterIndex, optionIndex) {
     this.filters[filterIndex].options[optionIndex].selected = !this.filters[filterIndex].options[optionIndex].selected;
     this.filterResults();
+    this.reOrder();
   }
 
   toggleFilters() {

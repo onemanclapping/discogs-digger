@@ -21,6 +21,7 @@ progress {
     width: 100%;
     -webkit-appearance: none;
     position: relative;
+    overflow: hidden;
 }
 
 progress[value]::-webkit-progress-bar {

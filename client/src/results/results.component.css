@@ -1,14 +1,10 @@
-.filter-set {
-    float: left;
-    margin-right: 20px;
-}
-
 label {
-    display: block;
+    display: inline-block;
+    min-width: 180px;
+    margin-right: 10px;
 }
 
-.filter-wrapper {
-    overflow: hidden;
+fieldset {
     margin-top: 20px;
 }
 
@@ -33,4 +29,13 @@ tbody tr:nth-child(2n + 1) {background: #EEE}
 
 .arrow.inactive {
     opacity: 0.1;
+}
+
+th, td {
+    white-space: nowrap;
+    line-height: 28px;
+}
+
+td:nth-child(2) {
+    white-space: normal;
 }

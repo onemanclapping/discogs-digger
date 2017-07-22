@@ -2,7 +2,6 @@ const app = require('express')();
 const Discogs = require('disconnect').Client;
 const cookieParser = require('cookie-parser');
 const proxy = require('express-http-proxy');
-const removeDiacritics = require('diacritics').remove
 
 app.use(cookieParser());
 
@@ -82,7 +81,7 @@ app.get('/api/buyer/:buyerId', async (req, res) => {
     for (let actualPage = 1; actualPage <= totalPages; actualPage++) {
         let result = await discogs.user().collection().getReleases(buyerId, 0, {per_page: 100, page: actualPage, sort: 'artist', sort_order: 'asc'});
         totalPages = result.pagination.pages;
-        result.releases.forEach(rel => rel.basic_information.artists.forEach(artist => artists.add(removeDiacritics(artist.name).toLowerCase())));
+        result.releases.forEach(rel => rel.basic_information.artists.forEach(artist => artists.add(artist.name)));
         buyerStatus[buyerId] = Math.floor(actualPage/totalPages*100);
     }
 
@@ -98,9 +97,12 @@ app.get('/api/status/buyer/:buyerId', async (req, res) => {
 // SELLER STUFF
 
 function transformListing(listing) {
-    const limit = listing.release.description.indexOf(` - `)
-    const artist = removeDiacritics(listing.release.description.substring(0, limit)).toLowerCase();
-    const title = listing.release.description.substring(limit + 3)
+    const limit = listing.release.description.indexOf(` - `);
+    const artist = listing.release.description.substring(0, limit);
+    const title = listing.release.description.substring(limit + 3);
+    const lastOpen = listing.release.description.lastIndexOf('(');
+    const lastClose = listing.release.description.lastIndexOf(')');
+    const types = listing.release.description.substring(lastOpen + 1, lastClose).split(',').map(s => s.trim());
 
     return {
         condition: listing.condition,
@@ -108,7 +110,8 @@ function transformListing(listing) {
         currency: listing.price.currency,
         uri: listing.uri,
         artist,
-        title
+        title,
+        types
     };
 }
 
