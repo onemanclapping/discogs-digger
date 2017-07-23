@@ -19,7 +19,7 @@ export class ResultsComponent implements OnInit {
       name: 'artist',
       canOrder: true,
       desc: false,
-      inactive: true
+      inactive: false
     },
     {
       name: 'title',
