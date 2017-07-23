@@ -6,6 +6,7 @@ import { Observable } from 'rxjs/Observable';
 import { Subscription } from 'rxjs/Subscription';
 import 'rxjs/add/observable/concat';
 
+import { ProgressOverlayService } from '../progress-overlay/progress-overlay.service';
 
 @Component({
   selector: 'app-home',
@@ -19,13 +20,15 @@ export class HomeComponent implements OnInit {
   public seller;
   public user;
   
-  constructor(private _apiService: ApiService, private _loginService: LoginService, private _router: Router) { }
+  constructor(private _apiService: ApiService, private _loginService: LoginService, private _progressOverlayService: ProgressOverlayService,
+    private _router: Router) { }
   
   ngOnInit() {
     this._loginService.loggedInSubject.subscribe(state => {
       this.loggedIn = state.loggedIn;
       this.user = state.user;
     });
+    this._progressOverlayService.setCancelCallback(() => console.log('cancel from home'))
   }
 
   fetchData() {
@@ -33,7 +36,7 @@ export class HomeComponent implements OnInit {
 
     this._apiService.fetchBuyerAndSeller(this.user, this.seller).subscribe(res => {
       this._router.navigate(['/results', this.seller]);
-    });    
+    });
   }
 
   login() {

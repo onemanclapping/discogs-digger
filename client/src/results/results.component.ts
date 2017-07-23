@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ApiService } from '../app/api.service';
+import { LoginService } from '../app/login.service';
 
 @Component({
   selector: 'app-results',
@@ -40,20 +41,28 @@ export class ResultsComponent implements OnInit {
 
   private _rawResults: any[];
 
-  constructor(private route: ActivatedRoute,
-    private apiService: ApiService,
-    private router: Router) { }
+  constructor(
+    private _activatedRoute: ActivatedRoute,
+    private _apiService: ApiService,
+    private _loginService: LoginService,
+    private _router: Router
+  ) { }
 
   ngOnInit() {
-    this.route.params.subscribe(params => {
-      this.sellerId = params['sellerId'];
-        this.apiService.fetchBuyerAndSeller('onemanclap', this.sellerId).subscribe((res: any) => {
-          console.log('got results')
-          this._rawResults = this._matchBuyerWithSeller(res.buyer, res.seller);
-          this._generateFilters();
-          this._filterResults();
-          this._reOrder();
-        });
+    this._activatedRoute.params.subscribe(params => {
+      this._loginService.loggedInSubject.subscribe(loginInfo => {
+        if (loginInfo.loggedIn) {
+          this.sellerId = params['sellerId'];
+          this._apiService.fetchBuyerAndSeller(loginInfo.user, this.sellerId).subscribe((res: any) => {
+            this._rawResults = this._matchBuyerWithSeller(res.buyer, res.seller);
+            this._generateFilters();
+            this._filterResults();
+            this._reOrder();
+          });
+        } else {
+          this._router.navigate(['/']);
+        }
+      });
     });
   }
 

@@ -1,5 +1,7 @@
 import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
 import { ApiService } from '../api.service';
+import { ProgressOverlayService } from './progress-overlay.service';
+
 @Component({
   selector: 'app-progress-overlay',
   templateUrl: './progress-overlay.component.html',
@@ -12,8 +14,9 @@ export class ProgressOverlayComponent implements OnInit {
   public sellerProgressValue;
   
   private _sub;
+  private _onCancelClick;
 
-  constructor (private _apiService: ApiService) {}
+  constructor (private _apiService: ApiService, private _progressOverlayService: ProgressOverlayService) {}
 
   ngOnInit() {
     this._apiService.isFetchingResultsSubject.subscribe((isFetchingResults: any) => {
@@ -29,10 +32,13 @@ export class ProgressOverlayComponent implements OnInit {
         this._sub && this._sub.unsubscribe();
       }
     });
+
+    this._progressOverlayService.cancelCallbackChanged.subscribe(cb => this._onCancelClick = cb)
   }
 
   onCancelClick() {
     console.log('cancel clicked');
+    this._onCancelClick && this._onCancelClick();
   }
   
 }

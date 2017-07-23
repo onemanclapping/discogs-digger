@@ -13,6 +13,7 @@ import { ApiService } from './api.service';
 import { CoreModule } from '../core/core.module';
 import { InitComponent } from './init/init.component';
 import { ProgressOverlayComponent } from './progress-overlay/progress-overlay.component';
+import { ProgressOverlayService } from './progress-overlay/progress-overlay.service';
 
 
 @NgModule({
@@ -35,7 +36,7 @@ import { ProgressOverlayComponent } from './progress-overlay/progress-overlay.co
     CookieModule.forRoot(),
     HttpClientModule
   ],
-  providers: [LoginService, ApiService],
+  providers: [LoginService, ApiService, ProgressOverlayService],
   bootstrap: [AppComponent],
 })
 export class AppModule { }
