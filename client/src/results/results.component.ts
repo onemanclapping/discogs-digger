@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ResultsService } from '../app/results.service';
 import { ApiService } from '../app/api.service';
 
 @Component({
@@ -9,14 +8,11 @@ import { ApiService } from '../app/api.service';
   styleUrls: ['./results.component.css']
 })
 export class ResultsComponent implements OnInit {
-  sellerId: String = 'seller';
-  rawResults: any[];
-  filteredResults: any[];
-  isFiltersOpen: boolean = false;
-  buyerProgressValue: Number = 0;
-  sellerProgressValue: Number = 0;
-  isWorking: boolean = true;
-  headers:any = [
+  public sellerId: String = 'seller';
+  
+  public filteredResults: any[];
+  public isFiltersOpen: boolean = false;
+  public headers:any = [
     {
       name: 'artist',
       canOrder: true,
@@ -40,35 +36,72 @@ export class ResultsComponent implements OnInit {
       inactive: true
     }
   ];
-  filters;
+  public filters;
+
+  private _rawResults: any[];
 
   constructor(private route: ActivatedRoute,
-    private resultsService: ResultsService,
     private apiService: ApiService,
     private router: Router) { }
 
   ngOnInit() {
     this.route.params.subscribe(params => {
-      this.isWorking = true;
       this.sellerId = params['sellerId'];
-        this.apiService.fetchBuyerAndSeller('onemanclap', this.sellerId).subscribe(res => {
-          this.buyerProgressValue = res.buyer.progress;
-          this.sellerProgressValue = res.seller.progress;
-          
-          if (res.buyer.result && res.seller.result) {
-            this.isWorking = false;
-
-            this.rawResults = this.matchBuyerWithSeller(res.buyer.result, res.seller.result);
-            this.generateFilters();
-            this.filterResults();
-            this.reOrder();
-          }
+        this.apiService.fetchBuyerAndSeller('onemanclap', this.sellerId).subscribe((res: any) => {
+          console.log('got results')
+          this._rawResults = this._matchBuyerWithSeller(res.buyer, res.seller);
+          this._generateFilters();
+          this._filterResults();
+          this._reOrder();
         });
     });
   }
 
-  generateFilters() {
-    const availableTypesSet = this.rawResults.reduce((set, res) => {
+  toggleFilter(filterIndex, optionIndex) {
+    this.filters[filterIndex].options[optionIndex].selected = !this.filters[filterIndex].options[optionIndex].selected;
+    this._filterResults();
+    this._reOrder();
+  }
+
+  toggleFilters() {
+    this.isFiltersOpen = !this.isFiltersOpen;
+  }
+
+  toggleOrderBy(index) {
+    if (!this.headers[index].canOrder) return;
+
+    if (this.headers[index].inactive) {
+      for (let header of this.headers) {
+        header.inactive = true;
+      }
+      this.headers[index].inactive = false;
+    } else {
+      this.headers[index].desc = !this.headers[index].desc;
+    }
+
+    this._reOrder();
+  }
+
+  private _filterResults() {
+    this.filteredResults = this._rawResults.filter(item => this.filters.every(filter => {
+      if (filter.property === 'artist') {
+        return filter.options[0].selected || item.artist !== 'Various';
+      }
+
+      const activeOptions = filter.options.filter(option => option.selected).map(option => option.name);
+
+      if (activeOptions.length === 0) return true;
+
+      if (Array.isArray(item[filter.property])) {
+        return activeOptions.some(option => item[filter.property].includes(option));
+      }
+
+      return activeOptions.includes(item[filter.property]);
+    }));
+  }
+
+  private _generateFilters() {
+    const availableTypesSet = this._rawResults.reduce((set, res) => {
       res.types.forEach(type => set.add(type));
       return set;
     }, new Set());
@@ -79,7 +112,7 @@ export class ResultsComponent implements OnInit {
       };
     });
 
-    const availableConditionsSet = this.rawResults.reduce((set, res) => {
+    const availableConditionsSet = this._rawResults.reduce((set, res) => {
       set.add(res.condition);
       return set;
     }, new Set());
@@ -115,50 +148,11 @@ export class ResultsComponent implements OnInit {
     }];
   }
 
-  filterResults() {
-    this.filteredResults = this.rawResults.filter(item => this.filters.every(filter => {
-      if (filter.property === 'artist') {
-        return filter.options[0].selected || item.artist !== 'Various';
-      }
-
-      const activeOptions = filter.options.filter(option => option.selected).map(option => option.name);
-
-      if (activeOptions.length === 0) return true;
-
-      if (Array.isArray(item[filter.property])) {
-        return activeOptions.some(option => item[filter.property].includes(option));
-      }
-
-      return activeOptions.includes(item[filter.property]);
-    }));
+  private _matchBuyerWithSeller(buyerResults, sellerResults) {
+    return sellerResults.filter(sellerItem => buyerResults.includes(sellerItem.artist));
   }
 
-  toggleFilter(filterIndex, optionIndex) {
-    this.filters[filterIndex].options[optionIndex].selected = !this.filters[filterIndex].options[optionIndex].selected;
-    this.filterResults();
-    this.reOrder();
-  }
-
-  toggleFilters() {
-    this.isFiltersOpen = !this.isFiltersOpen;
-  }
-
-  toggleOrderBy(index) {
-    if (!this.headers[index].canOrder) return;
-
-    if (this.headers[index].inactive) {
-      for (let header of this.headers) {
-        header.inactive = true;
-      }
-      this.headers[index].inactive = false;
-    } else {
-      this.headers[index].desc = !this.headers[index].desc;
-    }
-
-    this.reOrder();
-  }
-
-  reOrder() {
+  private _reOrder() {
     const orderProp = this.headers.find(item => !item.inactive);
 
     if (orderProp) {
@@ -172,13 +166,5 @@ export class ResultsComponent implements OnInit {
         return prop1 > prop2 ? 1: -1;
       });
     }
-  }
-
-  cancelFetch() {
-    this.router.navigate(['/']);
-  }
-
-  matchBuyerWithSeller(buyerResults, sellerResults) {
-    return sellerResults.filter(sellerItem => buyerResults.includes(sellerItem.artist));
   }
 }

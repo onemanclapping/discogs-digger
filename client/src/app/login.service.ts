@@ -1,24 +1,31 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+import { ReplaySubject } from 'rxjs/ReplaySubject';
 import { CookieService } from 'ngx-cookie';
 import { ApiService } from './api.service';
 
 @Injectable()
 export class LoginService {
+  public loggedInSubject: ReplaySubject<any> = new ReplaySubject<any>();
+  
+  private _loggedOutState = {loggedIn: false};
 
-  loggedInState: BehaviorSubject<any> = new BehaviorSubject<any>({loggedIn: false});
-
-  constructor(private cookieService: CookieService, private apiService: ApiService) {
-    if (this.cookieService.get('token')) {
-      this.apiService.getIdentity().subscribe((res: any) => {
-        this.loggedInState.next({loggedIn: true, user: <any>res.username});
+  constructor(private _apiService: ApiService, private _cookieService: CookieService) {
+    if (this._cookieService.get('token')) {
+      this._apiService.getIdentity().subscribe((res: any) => {
+        if (res.username) {
+          this.loggedInSubject.next({loggedIn: true, user: <any>res.username});
+        } else {
+          this.logOut();
+        }
       });
+    } else {
+      this.loggedInSubject.next(this._loggedOutState);
     }
   }
 
   logOut() {
-    this.cookieService.remove('token');
-    this.cookieService.remove('tokenSecret');
-    this.loggedInState.next({loggedIn: false});
+    this._cookieService.remove('token');
+    this._cookieService.remove('tokenSecret');
+    this.loggedInSubject.next(this._loggedOutState);
   }
 }

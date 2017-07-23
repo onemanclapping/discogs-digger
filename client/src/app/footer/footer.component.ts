@@ -7,16 +7,15 @@ import { LoginService } from '../login.service';
   styleUrls: ['./footer.component.css']
 })
 export class FooterComponent implements OnInit {
-  loggedIn: boolean;
+  public loggedIn;
 
-  constructor(public loginService: LoginService) { }
+  constructor(private _loginService: LoginService) { }
 
   ngOnInit() {
-    this.loginService.loggedInState.subscribe(state => this.loggedIn = state.loggedIn);
+    this._loginService.loggedInSubject.subscribe(state => this.loggedIn = state.loggedIn);
   }
 
   logOut() {
-    this.loginService.logOut();
+    this._loginService.logOut();
   }
-
 }

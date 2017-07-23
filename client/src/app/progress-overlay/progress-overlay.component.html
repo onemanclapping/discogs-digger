@@ -1,0 +1,13 @@
+<app-overlay *ngIf="isFetchingResults">
+    <div class="progress-container">
+        <progress [attr.text]="'Fetching your library'"
+            [value]="buyerProgressValue"
+            max="100"></progress>
+    </div>
+    <div class="progress-container">
+        <progress [attr.text]="'Fetching ' + sellerName + '\'s library'"
+            [value]="sellerProgressValue"
+            max="100"></progress>
+    </div>
+    <button (click)="onCancelClick()">cancel</button>
+</app-overlay>

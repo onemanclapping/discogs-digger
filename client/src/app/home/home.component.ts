@@ -13,17 +13,32 @@ import 'rxjs/add/observable/concat';
   styleUrls: ['./home.component.css']
 })
 export class HomeComponent implements OnInit {
-  loggedIn;
-  seller: string;
-  isInputValid: boolean = false;
-  isWorking: boolean = false;
-  buyerProgressValue: Number = 0;
-  sellerProgressValue: Number = 0;
+  public isInputValid = false;
+  public isWorking = false;
+  public loggedIn;
+  public seller;
+  public user;
+  
+  constructor(private _apiService: ApiService, private _loginService: LoginService, private _router: Router) { }
+  
+  ngOnInit() {
+    this._loginService.loggedInSubject.subscribe(state => {
+      this.loggedIn = state.loggedIn;
+      this.user = state.user;
+    });
+  }
 
-  private currentFetch: Subscription;
+  fetchData() {
+    this.isWorking = true;
 
+    this._apiService.fetchBuyerAndSeller(this.user, this.seller).subscribe(res => {
+      this._router.navigate(['/results', this.seller]);
+    });    
+  }
 
-  constructor(private loginService: LoginService, private router: Router, private apiService: ApiService) { }
+  login() {
+    window.location.href = '/api/authorize';
+  }
 
   setSeller(event: KeyboardEvent) {
     this.seller = (<HTMLInputElement>event.target).value.trim();
@@ -33,31 +48,4 @@ export class HomeComponent implements OnInit {
       this.fetchData();
     }
   }
-
-  fetchData() {
-    this.isWorking = true;
-
-    this.currentFetch = this.apiService.fetchBuyerAndSeller('onemanclap', this.seller).subscribe(res => {
-      this.buyerProgressValue = res.buyer.progress;
-      this.sellerProgressValue = res.seller.progress;
-      
-      if (this.buyerProgressValue === 100 && this.sellerProgressValue === 100) {
-        this.router.navigate(['/results', this.seller]);
-      }
-    });    
-  }
-
-  cancelFetch() {
-    this.isWorking = false;
-    this.currentFetch.unsubscribe();
-  }
-
-  ngOnInit() {
-    this.loginService.loggedInState.subscribe(state => this.loggedIn = state);
-  }
-
-  login() {
-    window.location.href = '/api/authorize';
-  }
-
 }

@@ -33,9 +33,3 @@
         <td>{{entry.currency}} {{entry.price}}</td>
     </tr>
 </table>
-<app-progress-overlay
-    *ngIf="isWorking"
-    [buyerProgressValue]="buyerProgressValue"
-    [sellerProgressValue]="sellerProgressValue"
-    [sellerName]="sellerId"
-    (onCancel)="cancelFetch()"></app-progress-overlay>

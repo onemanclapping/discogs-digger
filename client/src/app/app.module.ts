@@ -9,16 +9,19 @@ import { AppComponent } from './app.component';
 import { HomeComponent } from './home/home.component';
 import { FooterComponent } from './footer/footer.component';
 import { LoginService } from './login.service';
-import { ResultsService } from './results.service';
 import { ApiService } from './api.service';
 import { CoreModule } from '../core/core.module';
+import { InitComponent } from './init/init.component';
+import { ProgressOverlayComponent } from './progress-overlay/progress-overlay.component';
 
 
 @NgModule({
   declarations: [
     AppComponent,
     HomeComponent,
-    FooterComponent
+    FooterComponent,
+    InitComponent,
+    ProgressOverlayComponent
   ],
   imports: [
     BrowserModule,
@@ -32,7 +35,7 @@ import { CoreModule } from '../core/core.module';
     CookieModule.forRoot(),
     HttpClientModule
   ],
-  providers: [LoginService, ResultsService, ApiService],
+  providers: [LoginService, ApiService],
   bootstrap: [AppComponent],
 })
 export class AppModule { }

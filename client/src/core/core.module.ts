@@ -1,15 +1,15 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 
-import { ProgressOverlayComponent } from './progress-overlay/progress-overlay.component';
+import { OverlayComponent } from './overlay/overlay.component';
 
 @NgModule({
   declarations: [
-    ProgressOverlayComponent
+    OverlayComponent
   ],
   imports: [
     CommonModule
   ],
-  exports: [ProgressOverlayComponent]
+  exports: [OverlayComponent]
 })
 export class CoreModule { }
