@@ -37,8 +37,8 @@ export class ProgressOverlayComponent implements OnInit {
   }
 
   onCancelClick() {
-    console.log('cancel clicked');
     this._onCancelClick && this._onCancelClick();
+    this.isFetchingResults = false;
   }
   
 }

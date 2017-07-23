@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ApiService } from '../app/api.service';
 import { LoginService } from '../app/login.service';
+import { ProgressOverlayService } from '../app/progress-overlay/progress-overlay.service';
 
 @Component({
   selector: 'app-results',
@@ -39,12 +40,14 @@ export class ResultsComponent implements OnInit {
   ];
   public filters;
 
-  private _rawResults: any[];
+  private _rawResults;
+  private _subscription;
 
   constructor(
     private _activatedRoute: ActivatedRoute,
     private _apiService: ApiService,
     private _loginService: LoginService,
+    private _progressOverlayService: ProgressOverlayService,
     private _router: Router
   ) { }
 
@@ -53,11 +56,16 @@ export class ResultsComponent implements OnInit {
       this._loginService.loggedInSubject.subscribe(loginInfo => {
         if (loginInfo.loggedIn) {
           this.sellerId = params['sellerId'];
-          this._apiService.fetchBuyerAndSeller(loginInfo.user, this.sellerId).subscribe((res: any) => {
+          this._subscription = this._apiService.fetchBuyerAndSeller(loginInfo.user, this.sellerId).subscribe((res: any) => {
             this._rawResults = this._matchBuyerWithSeller(res.buyer, res.seller);
             this._generateFilters();
             this._filterResults();
             this._reOrder();
+          });
+
+          this._progressOverlayService.setCancelCallback(() => {
+            this._subscription.unsubscribe();
+            this._router.navigate(['/']);
           });
         } else {
           this._router.navigate(['/']);

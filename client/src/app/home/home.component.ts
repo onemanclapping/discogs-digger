@@ -19,22 +19,28 @@ export class HomeComponent implements OnInit {
   public loggedIn;
   public seller;
   public user;
+
+  private _subscription;
   
-  constructor(private _apiService: ApiService, private _loginService: LoginService, private _progressOverlayService: ProgressOverlayService,
-    private _router: Router) { }
+  constructor(
+    private _apiService: ApiService,
+    private _loginService: LoginService,
+    private _progressOverlayService: ProgressOverlayService,
+    private _router: Router
+  ) { }
   
   ngOnInit() {
     this._loginService.loggedInSubject.subscribe(state => {
       this.loggedIn = state.loggedIn;
       this.user = state.user;
     });
-    this._progressOverlayService.setCancelCallback(() => console.log('cancel from home'))
+    this._progressOverlayService.setCancelCallback(() => {
+      this._subscription.unsubscribe();
+    });
   }
 
   fetchData() {
-    this.isWorking = true;
-
-    this._apiService.fetchBuyerAndSeller(this.user, this.seller).subscribe(res => {
+    this._subscription = this._apiService.fetchBuyerAndSeller(this.user, this.seller).subscribe(res => {
       this._router.navigate(['/results', this.seller]);
     });
   }
