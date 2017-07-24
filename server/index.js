@@ -71,22 +71,48 @@ app.get('/api/identity', function(req, res){
 });
 
 const buyerStatus = {};
+const buyerPromises = {};
 app.get('/api/buyer/:buyerId', async (req, res) => {
-    const discogs = new Discogs(generateAuthOptions(req.cookies));
-    const requestQueue = [{per_page: 100, page: 1, sort: 'artist', sort_order: 'asc'}];
-    let totalPages = 1;
-    const artists = new Set();
     const buyerId = req.params.buyerId;
+    let result;
 
-    for (let actualPage = 1; actualPage <= totalPages; actualPage++) {
-        let result = await discogs.user().collection().getReleases(buyerId, 0, {per_page: 100, page: actualPage, sort: 'artist', sort_order: 'asc'});
-        totalPages = result.pagination.pages;
-        result.releases.forEach(rel => rel.basic_information.artists.forEach(artist => artists.add(artist.name)));
-        buyerStatus[buyerId] = Math.floor(actualPage/totalPages*100);
+    // If this is the first request for this buyer, create a promise to be reused in case there is a similar request
+    // before this one completes
+    if (!buyerPromises[buyerId]) {
+        buyerPromises[buyerId] = {
+            promise: new Promise(async resolve => {
+                const discogs = new Discogs(generateAuthOptions(req.cookies));
+                const requestQueue = [{per_page: 100, page: 1, sort: 'artist', sort_order: 'asc'}];
+                let totalPages = 1;
+                const artists = new Set();
+
+                for (let actualPage = 1; actualPage <= totalPages; actualPage++) {
+                    let result = await discogs.user().collection().getReleases(buyerId, 0, {per_page: 100, page: actualPage, sort: 'artist', sort_order: 'asc'});
+                    totalPages = result.pagination.pages;
+                    result.releases.forEach(rel => rel.basic_information.artists.forEach(artist => artists.add(artist.name)));
+                    buyerStatus[buyerId] = Math.floor(actualPage/totalPages*100);
+                }
+
+                delete buyerStatus[buyerId];
+
+                result = [...artists.values()];
+
+                resolve(result);
+            }),
+            refCount: 0
+        }
     }
 
-    res.json([...artists.values()]);
-    delete buyerStatus[buyerId];
+    buyerPromises[buyerId].refCount++;
+    result = await buyerPromises[buyerId].promise;
+    buyerPromises[buyerId].refCount--;
+    
+
+    // If there are no subscribers left for this promise, delete it
+    if (buyerPromises[buyerId].refCount === 0) {
+        delete buyerPromises[buyerId];
+    }
+    res.json(result);
 });
 
 app.get('/api/status/buyer/:buyerId', async (req, res) => {
@@ -116,22 +142,48 @@ function transformListing(listing) {
 }
 
 const sellerStatus = {};
+const sellerPromises = {};
 app.get('/api/seller/:sellerId', async (req, res) => {
-    const discogs = new Discogs(generateAuthOptions(req.cookies));
-    const requestQueue = [{per_page: 100, page: 1, sort: 'artist', sort_order: 'asc'}];
-    let totalPages = 1;
-    const listings = [];
     const sellerId = req.params.sellerId;
 
-    for (let actualPage = 1; actualPage <= totalPages; actualPage++) {
-        let result = await discogs.marketplace().getInventory(sellerId, {per_page: 100, page: actualPage, sort: 'artist', sort_order: 'asc'})
-        totalPages = result.pagination.pages;
-        result.listings.forEach(listing => listings.push(transformListing(listing)));
-        sellerStatus[sellerId] = Math.floor(actualPage/totalPages*100);
+    // If this is the first request for this seller, create a promise to be reused in case there is a similar request
+    // before this one completes
+    if (!sellerPromises[sellerId]) {
+        sellerPromises[sellerId] = {
+            promise: new Promise(async resolve => {
+                const discogs = new Discogs(generateAuthOptions(req.cookies));
+                const requestQueue = [{per_page: 100, page: 1, sort: 'artist', sort_order: 'asc'}];
+                let totalPages = 1;
+                const listings = [];
+                
+
+                for (let actualPage = 1; actualPage <= totalPages; actualPage++) {
+                    let result = await discogs.marketplace().getInventory(sellerId, {per_page: 100, page: actualPage, sort: 'artist', sort_order: 'asc'})
+                    totalPages = result.pagination.pages;
+                    result.listings.forEach(listing => listings.push(transformListing(listing)));
+                    sellerStatus[sellerId] = Math.floor(actualPage/totalPages*100);
+                }
+                
+                delete sellerStatus[sellerId];
+
+                result = listings;
+
+                resolve(result);
+            }),
+            refCount: 0
+        }
     }
 
-    res.json(listings);
-    delete sellerStatus[sellerId];
+    sellerPromises[sellerId].refCount++;
+    result = await sellerPromises[sellerId].promise;
+    sellerPromises[sellerId].refCount--;
+
+    // If there are no subscribers left for this promise, delete it
+    if (sellerPromises[sellerId].refCount === 0) {
+        delete sellerPromises[sellerId];
+    }    
+
+    res.json(result);
 });
 
 app.get('/api/status/seller/:sellerId', async (req, res) => {
