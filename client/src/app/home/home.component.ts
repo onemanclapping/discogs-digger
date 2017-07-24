@@ -17,6 +17,7 @@ export class HomeComponent implements OnInit {
   public isInputValid = false;
   public isWorking = false;
   public loggedIn;
+  public previousSellers;
   public seller;
   public user;
 
@@ -37,12 +38,22 @@ export class HomeComponent implements OnInit {
     this._progressOverlayService.setCancelCallback(() => {
       this._subscription.unsubscribe();
     });
+
+    this._getPreviousSellers();
   }
 
   fetchData() {
     this._subscription = this._apiService.fetchBuyerAndSeller(this.user, this.seller).subscribe(res => {
       this._router.navigate(['/results', this.seller]);
     });
+  }
+
+  clear() {
+    this.previousSellers = Object.keys(localStorage)
+      .filter(key => key.startsWith('seller-') || key.startsWith('buyer-'))
+      .map(key => localStorage.removeItem(key));
+
+    this._getPreviousSellers();
   }
 
   login() {
@@ -56,5 +67,9 @@ export class HomeComponent implements OnInit {
     if (this.isInputValid && event.keyCode == 13) {
       this.fetchData();
     }
+  }
+
+  _getPreviousSellers() {
+    this.previousSellers = Object.keys(localStorage).filter(key => key.startsWith('seller-')).map(key => key.substring(7));
   }
 }

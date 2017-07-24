@@ -1,5 +1,6 @@
-<h1><a routerLink="">Discogs Digger</a></h1>
-<app-init *ngIf="!isConnected"></app-init>
-<app-progress-overlay></app-progress-overlay>
+<app-header></app-header>
 <router-outlet></router-outlet>
 <app-footer></app-footer>
+
+<app-init *ngIf="!isConnected"></app-init>
+<app-progress-overlay></app-progress-overlay>

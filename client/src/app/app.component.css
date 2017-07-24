@@ -3,13 +3,9 @@
     color: #1e1e1e;
 }
 
-h1 {
-    text-align: center;
-}
-
-h1 a {
-    color: #1e1e1e;
-    text-decoration: none;
+body {
+    padding: 10px;
+    margin: 0;
 }
 
 app-footer {

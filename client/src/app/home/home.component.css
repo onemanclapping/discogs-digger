@@ -21,3 +21,11 @@ input {
     box-sizing: border-box;
     margin-bottom: 20px;
 }
+
+a {
+    display: block;
+}
+
+.clear{
+    margin-top: 20px;
+}

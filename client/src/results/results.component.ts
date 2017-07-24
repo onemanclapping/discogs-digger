@@ -10,11 +10,9 @@ import { ProgressOverlayService } from '../app/progress-overlay/progress-overlay
   styleUrls: ['./results.component.css']
 })
 export class ResultsComponent implements OnInit {
-  public sellerId: String = 'seller';
-  
-  public filteredResults: any[];
-  public isFiltersOpen: boolean = false;
-  public headers:any = [
+  public filteredResults;
+  public filters;
+  public headers: any = [
     {
       name: 'artist',
       canOrder: true,
@@ -38,7 +36,8 @@ export class ResultsComponent implements OnInit {
       inactive: true
     }
   ];
-  public filters;
+  public isFiltersOpen = false;
+  public sellerId;
 
   private _rawResults;
   private _subscription;

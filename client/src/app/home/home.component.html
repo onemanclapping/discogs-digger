@@ -3,5 +3,10 @@
 <div *ngIf="loggedIn">
     <h3>logged in as {{user}}</h3>
     <input (keyup)="setSeller($event)" type="text" placeholder="Type the name of your potential seller"/>
-    <button [disabled]="!isInputValid" (click)="fetchData()">GO!</button>
+    <button [disabled]="!isInputValid" (click)="fetchData()">DIG!</button>
+    <h4 *ngIf="previousSellers.length > 0">...or choose from a recently dug seller</h4>
+    <a *ngFor="let seller of previousSellers" [routerLink]="['/results', seller]">{{seller}}</a>
+    <a class="clear"
+        *ngIf="previousSellers.length > 0"
+        (click)="clear()">Clear cached data</a>
 </div>
