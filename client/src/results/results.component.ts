@@ -174,12 +174,18 @@ export class ResultsComponent implements OnInit {
     if (orderProp) {
       this.filteredResults.sort((item1, item2) => {
         const prop1 = item1[orderProp.name];
-        const prop2 = item2[orderProp.name];
+        const prop1title = item1.title;
 
-        if (orderProp.desc) {
-          return prop1 < prop2 ? 1 : -1;
+        const prop2 = item2[orderProp.name];
+        const prop2title = item2.title;
+
+        if (prop1 < prop2) {
+          return orderProp.desc ? 1 : -1;
         }
-        return prop1 > prop2 ? 1: -1;
+        if (prop1 > prop2) {
+          return orderProp.desc ? -1 : 1;
+        }
+        return prop1title < prop2title ? -1 : 1;
       });
     }
   }
