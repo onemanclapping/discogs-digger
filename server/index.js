@@ -3,6 +3,9 @@ const Discogs = require('disconnect').Client;
 const cookieParser = require('cookie-parser');
 const proxy = require('express-http-proxy');
 
+// require('./throttled-disconnect.js');
+require('./throttled-disconnect2.js');
+
 app.use(cookieParser());
 
 const keys = {
