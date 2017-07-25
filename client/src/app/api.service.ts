@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { ReplaySubject } from 'rxjs/ReplaySubject';
 import { Subject } from 'rxjs/Subject';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-import { HttpClient } from '@angular/common/http';
+import { Http } from '@angular/http';
 import { IntervalObservable } from 'rxjs/observable/IntervalObservable';
 import 'rxjs/add/operator/mergeMap';
 import 'rxjs/add/operator/map';
@@ -25,7 +25,7 @@ export class ApiService {
     }
   };
 
-  constructor(private _http: HttpClient) { }
+  constructor(private _http: Http) { }
 
   fetchBuyerAndSeller(buyer, seller) {
     const fetch = new ReplaySubject();
@@ -62,7 +62,7 @@ export class ApiService {
   }
 
   getIdentity() {
-    return this._http.get('/api/identity');
+    return this._http.get('/api/identity').map(res => res.json());
   }
 
   private _emitProgress() {
@@ -83,7 +83,7 @@ export class ApiService {
 
     this._buyerCache[buyer] = fetch;
 
-    this._http.get(`/api/buyer/${buyer}`).subscribe(res => {
+    this._http.get(`/api/buyer/${buyer}`).map(res => res.json()).subscribe(res => {
       fetch.next(res);
       localStorage.setItem(localKey, JSON.stringify(res));
     });
@@ -105,7 +105,7 @@ export class ApiService {
 
     this._sellerCache[seller] = fetch;
 
-    this._http.get(`/api/seller/${seller}`).subscribe(res => {
+    this._http.get(`/api/seller/${seller}`).map(res => res.json()).subscribe(res => {
       fetch.next(res);
       localStorage.setItem(localKey, JSON.stringify(res));
     });
@@ -115,12 +115,12 @@ export class ApiService {
 
   private _pollBuyerState(buyer) {
     return IntervalObservable.create(1000)
-      .flatMap(() => this._http.get(`/api/status/buyer/${buyer}`));
+      .flatMap(() => this._http.get(`/api/status/buyer/${buyer}`)).map(res => res.json());
   }
 
   private _pollSellerState(seller) {
     return IntervalObservable.create(1000)
-      .flatMap(() => this._http.get(`/api/status/seller/${seller}`));
+      .flatMap(() => this._http.get(`/api/status/seller/${seller}`)).map(res => res.json());
   }
 
   private _resetProgress(buyerName, sellerName) {

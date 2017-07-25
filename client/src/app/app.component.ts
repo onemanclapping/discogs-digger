@@ -1,5 +1,5 @@
 import { Component, ViewEncapsulation, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, NavigationEnd } from '@angular/router';
 
 import { LoginService } from './login.service';
 import { ApiService } from './api.service';
@@ -22,11 +22,12 @@ export class AppComponent implements OnInit {
 
   ngOnInit() {
     this._loginService.loggedInSubject.subscribe(() => this.isConnected = true)
+
+    this._router.events.subscribe((event:NavigationEnd) => {
+      if (event instanceof NavigationEnd) {
+        (<any>window).ga('send', 'pageview', event.url);
+      }
+    });
   }
 
-  // cancelFetchResults() {
-  //   // this.apiService.stopFetchingResults();
-  //   this.isFetchingResults = false;
-  //   this.router.navigate(['/']);
-  // }
 }

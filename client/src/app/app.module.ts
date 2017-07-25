@@ -1,7 +1,7 @@
 import { BrowserModule } from '@angular/platform-browser';
-import { NgModule } from '@angular/core';
+import { NgModule, ErrorHandler } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { HttpClientModule } from '@angular/common/http';
+import { HttpModule, Http } from '@angular/http';
 
 import { CookieModule } from 'ngx-cookie';
 
@@ -15,6 +15,9 @@ import { InitComponent } from './init/init.component';
 import { HeaderComponent } from './header/header.component';
 import { ProgressOverlayComponent } from './progress-overlay/progress-overlay.component';
 import { ProgressOverlayService } from './progress-overlay/progress-overlay.service';
+import { GAErrorHandler } from './ga-error-handler';
+import { LoggedHttpService } from './logged-http.service';
+import { GAService } from './ga.service';
 
 
 @NgModule({
@@ -36,9 +39,15 @@ import { ProgressOverlayService } from './progress-overlay/progress-overlay.serv
     ]),
     CoreModule,
     CookieModule.forRoot(),
-    HttpClientModule
+    HttpModule
   ],
-  providers: [LoginService, ApiService, ProgressOverlayService],
+  providers: [{
+    provide: ErrorHandler,
+    useClass: GAErrorHandler
+  }, {
+    provide: Http,
+    useClass: LoggedHttpService
+  }, LoginService, ApiService, ProgressOverlayService, GAService],
   bootstrap: [AppComponent],
 })
 export class AppModule { }
