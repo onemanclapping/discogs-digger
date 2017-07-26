@@ -1,12 +1,19 @@
-const app = require('express')();
+const express = require('express');
+const app = express();
 const Discogs = require('disconnect').Client;
 const cookieParser = require('cookie-parser');
 const proxy = require('express-http-proxy');
+const morgan = require('morgan');
+const fs = require('fs');
+const logFile = fs.createWriteStream('./digger.log', {flags: 'a'}); //use {flags: 'w'} to open in write mode
+
 
 // require('./throttled-disconnect.js');
 require('./throttled-disconnect2.js');
 
 app.use(cookieParser());
+app.use(morgan("combined", {stream: logFile}))
+
 
 const keys = {
 	consumerKey: 'uyNlWLZmSEGTNVJHFCyZ', 
