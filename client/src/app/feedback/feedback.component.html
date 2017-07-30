@@ -1,0 +1,9 @@
+<app-overlay *ngIf="isFeedbackOpen" (onOutsideClick)="close()">
+    <div class="form">
+      <!-- <label for="comment"></label> -->
+      <textarea id="comment" [(ngModel)]="comment" placeholder="Hey! This is a pretty new app and I'd love some feedback, so please leave your words of love or hate:"></textarea>
+      <!-- <label for="contact"></label> -->
+       <input type="text" id="contact" [(ngModel)]="contact" placeholder="E-mail/Facebook/Twitter/some way I can get back to you:"/> 
+      <button (click)="submit()">Submit</button>
+    </div>
+</app-overlay>

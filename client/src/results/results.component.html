@@ -1,35 +1,40 @@
-<h2>Records from {{sellerId}} you may like</h2>
-<div *ngIf="!isFiltersOpen">
-    <button (click)="toggleFilters()">Show filters</button>
-</div>
-<div *ngIf="isFiltersOpen">
-    <button (click)="toggleFilters()">Hide filters</button>
-    <div class="filter-wrapper">
-        <fieldset *ngFor="let filter of filters; let filterIndex = index">
-            <legend>{{filter.name}}</legend>
-            <label *ngFor="let option of filter.options; let optionIndex = index">
-                <input type="checkbox" (click)="toggleFilter(filterIndex, optionIndex)" [checked]="option.selected ? true : false">
-                    {{option.name}}</label>
-        </fieldset>
+<div *ngIf="hasResults">
+    <h2>Records from {{sellerId}} you may like</h2>
+    <div *ngIf="!isFiltersOpen">
+        <button (click)="toggleFilters()">Show filters</button>
     </div>
-</div>
-<table>
-    <thead>
-        <tr>
-            <th *ngFor="let header of headers; let i = index"
-                (click)="toggleOrderBy(i)"
-                [ngClass]="{'active': header.canOrder}">
-                {{header.name}}
-                <span class="arrow"
-                    *ngIf="header.canOrder"
-                    [ngClass]="{'desc': header.desc, 'inactive': header.inactive}">▲</span>
-            </th>
+    <div *ngIf="isFiltersOpen">
+        <button (click)="toggleFilters()">Hide filters</button>
+        <div class="filter-wrapper">
+            <fieldset *ngFor="let filter of filters; let filterIndex = index">
+                <legend>{{filter.name}}</legend>
+                <label *ngFor="let option of filter.options; let optionIndex = index">
+                    <input type="checkbox" (click)="toggleFilter(filterIndex, optionIndex)" [checked]="option.selected ? true : false">
+                        {{option.name}}</label>
+            </fieldset>
+        </div>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th *ngFor="let header of headers; let i = index"
+                    (click)="toggleOrderBy(i)"
+                    [ngClass]="{'active': header.canOrder}">
+                    {{header.name}}
+                    <span class="arrow"
+                        *ngIf="header.canOrder"
+                        [ngClass]="{'desc': header.desc, 'inactive': header.inactive}">▲</span>
+                </th>
+            </tr>
+        </thead>
+        <tr *ngFor="let entry of filteredResults">
+            <td>{{entry.artist}}</td>
+            <td><a href="{{entry.uri}}">{{entry.title}}</a></td>
+            <td>{{entry.condition}}</td>
+            <td>{{entry.currency}} {{entry.price}}</td>
         </tr>
-    </thead>
-    <tr *ngFor="let entry of filteredResults">
-        <td>{{entry.artist}}</td>
-        <td><a href="{{entry.uri}}">{{entry.title}}</a></td>
-        <td>{{entry.condition}}</td>
-        <td>{{entry.currency}} {{entry.price}}</td>
-    </tr>
-</table>
+    </table>
+</div>
+<div *ngIf="!hasResults">
+    <h2>Sorry! It looks like {{sellerId}} is not selling anything that may interest you.</h2>
+</div>

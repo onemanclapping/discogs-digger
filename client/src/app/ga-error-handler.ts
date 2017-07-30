@@ -6,7 +6,7 @@ export class GAErrorHandler implements ErrorHandler {
   constructor(private _ga: GAService) { }
   
   handleError(error) {
-    this._ga.sendEvent('core', 'error', JSON.stringify(error));
+    this._ga.sendEvent('core', 'error', error.toString());
     throw error;
   }
 }

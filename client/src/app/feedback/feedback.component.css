@@ -1,0 +1,25 @@
+* {
+    display: block;
+}
+
+.form {
+    max-width: 500px;
+    display: block;
+    margin: 0 auto;
+    border: 1px solid black;
+}
+
+textarea, input {
+    width: 100%;
+    box-sizing: border-box;
+    border: 0;
+    font-size: 14px;
+}
+
+textarea {
+    height: 100px;
+}
+
+button {
+    margin: 10px auto 0;
+}

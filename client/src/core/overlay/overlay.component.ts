@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Output, EventEmitter } from '@angular/core';
 
 @Component({
   selector: 'app-overlay',
@@ -6,7 +6,14 @@ import { Component } from '@angular/core';
   styleUrls: ['./overlay.component.css']
 })
 export class OverlayComponent {
+  @Output()
+  public onOutsideClick = new EventEmitter();
 
   constructor() { }
 
+  userClickedOutside($event) {
+    if ($event.target.classList.contains('center')) {
+      this.onOutsideClick.emit();
+    }
+  }
 }

@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { LoginService } from '../login.service';
+import { FeedbackService } from '../feedback/feedback.service';
 
 @Component({
   selector: 'app-footer',
@@ -9,7 +10,7 @@ import { LoginService } from '../login.service';
 export class FooterComponent implements OnInit {
   public loggedIn;
 
-  constructor(private _loginService: LoginService) { }
+  constructor(private _feedbackService: FeedbackService, private _loginService: LoginService) { }
 
   ngOnInit() {
     this._loginService.loggedInSubject.subscribe(state => this.loggedIn = state.loggedIn);
@@ -17,5 +18,9 @@ export class FooterComponent implements OnInit {
 
   logOut() {
     this._loginService.logOut();
+  }
+
+  openFeedback() {
+    this._feedbackService.openFeedback();
   }
 }

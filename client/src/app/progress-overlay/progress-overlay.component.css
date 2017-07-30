@@ -30,11 +30,3 @@ progress:before {
     left: 10px;
     line-height: 30px;
 }
-
-button {
-    background: #0366d6;
-    border-radius: 4px;
-    font-size: 28px;
-    padding: 10px 30px;
-    color: white;
-}

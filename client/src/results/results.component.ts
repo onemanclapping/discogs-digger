@@ -12,6 +12,7 @@ import { ProgressOverlayService } from '../app/progress-overlay/progress-overlay
 export class ResultsComponent implements OnInit {
   public filteredResults;
   public filters;
+  public hasResults;
   public headers: any = [
     {
       name: 'artist',
@@ -57,6 +58,7 @@ export class ResultsComponent implements OnInit {
           this.sellerId = params['sellerId'];
           this._subscription = this._apiService.fetchBuyerAndSeller(loginInfo.user, this.sellerId).subscribe((res: any) => {
             this._rawResults = this._matchBuyerWithSeller(res.buyer, res.seller);
+            this.hasResults = this._rawResults.length > 0;
             this._generateFilters();
             this._filterResults();
             this._reOrder();
