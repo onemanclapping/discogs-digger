@@ -29,7 +29,7 @@
         </thead>
         <tr *ngFor="let entry of filteredResults">
             <td>{{entry.artist}}</td>
-            <td><a href="{{entry.uri}}">{{entry.title}}</a></td>
+            <td><a href="{{entry.uri}}" target="_blank">{{entry.title}}</a></td>
             <td>{{entry.condition}}</td>
             <td>{{entry.currency}} {{entry.price}}</td>
         </tr>
