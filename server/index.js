@@ -92,7 +92,6 @@ app.get('/api/buyer/:buyerId', async (req, res) => {
         buyerPromises[buyerId] = {
             promise: new Promise(async resolve => {
                 const discogs = new Discogs(generateAuthOptions(req.cookies));
-                const requestQueue = [{per_page: 100, page: 1, sort: 'artist', sort_order: 'asc'}];
                 let totalPages = 1;
                 const artists = new Set();
 
@@ -162,14 +161,15 @@ app.get('/api/seller/:sellerId', async (req, res) => {
         sellerPromises[sellerId] = {
             promise: new Promise(async resolve => {
                 const discogs = new Discogs(generateAuthOptions(req.cookies));
-                const requestQueue = [{per_page: 100, page: 1, sort: 'artist', sort_order: 'asc'}];
                 let totalPages = 1;
                 const listings = [];
                 
 
                 for (let actualPage = 1; actualPage <= totalPages; actualPage++) {
-                    let result = await discogs.marketplace().getInventory(sellerId, {per_page: 100, page: actualPage, sort: 'artist', sort_order: 'asc'})
-                    totalPages = result.pagination.pages;
+                    let page = actualPage <= 100 ? actualPage : actualPage - 100;
+                    let sort_order = actualPage <= 100 ? 'asc' : 'desc';
+                    let result = await discogs.marketplace().getInventory(sellerId, {per_page: 100, page, sort: 'artist', sort_order});
+                    totalPages = Math.min(result.pagination.pages, 200);
                     result.listings.forEach(listing => listings.push(transformListing(listing)));
                     sellerStatus[sellerId] = Math.floor(actualPage/totalPages*100);
                 }
